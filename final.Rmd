@@ -1,0 +1,14 @@
+---
+title: "final"
+author: "Anna Davtyan"
+date: "2024-07-24"
+output: html_document
+---
+
+```{r}
+library(tidyverse)
+data <- read_csv("data/vazgen.csv")
+main_data <- data |>
+  filter(entry_id >= 1331 & entry_id <= 10021)
+
+```
