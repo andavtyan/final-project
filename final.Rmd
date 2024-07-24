@@ -6,9 +6,37 @@ output: html_document
 ---
 
 ```{r}
+#| echo: false
+#| message: false
 library(tidyverse)
 data <- read_csv("data/vazgen.csv")
 main_data <- data |>
-  filter(entry_id >= 1331 & entry_id <= 10021)
+  filter(entry_id >= 1331 & entry_id <= 10021) |>
+  select(temperature:direction)
 
 ```
+
+```{r}
+#| echo: false
+main_data |> drop_na() |>
+  ggplot(aes(x = speed, color = direction, fill = direction)) + 
+  geom_histogram(alpha = 0.75, binwidth = 1, linewidth = .1) + 
+  labs(title = "Dependancy of speed of wind and direction of wind over time",
+       x = "Speed", 
+       y = NULL,
+       color = "Direction",
+       fill = "Direction")
+```
+
+```{r}
+#| echo: false
+library(ggplot2)
+theme_set(theme_classic())
+main_data |> drop_na() |>
+  ggplot(aes(direction)) +
+  geom_bar(aes(fill = direction), width = 0.5) + 
+  labs(title="Histogram on Categorical Variable", 
+       subtitle="Manufacturer across Vehicle Classes") 
+
+```
+
