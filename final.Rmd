@@ -11,32 +11,48 @@ output: html_document
 library(tidyverse)
 data <- read_csv("data/vazgen.csv")
 main_data <- data |>
-  filter(entry_id >= 1331 & entry_id <= 10021) |>
-  select(temperature:direction)
-
+  filter(entry_id >= 1331 & entry_id <= 10021)
 ```
 
 ```{r}
 #| echo: false
-main_data |> drop_na() |>
-  ggplot(aes(x = speed, color = direction, fill = direction)) + 
-  geom_histogram(alpha = 0.75, binwidth = 1, linewidth = .1) + 
-  labs(title = "Dependancy of speed of wind and direction of wind over time",
-       x = "Speed", 
-       y = NULL,
-       color = "Direction",
-       fill = "Direction")
+library(dplyr)
+order <- c("N", "NE", "E", "SE", "S", "SW", "W", "NW")
+main_data |>
+  drop_na(direction, speed) |>
+  mutate(direction = factor(direction, levels = order)) |>
+  ggplot(aes(x = as.factor(direction), fill = direction)) + 
+  geom_bar(width = 1) +
+  coord_polar(start = -0.4) +
+  labs(title = "Wind Rose", x = "Wind Direction", y = "Frequency", fill = "Direction") +
+  theme_minimal()
+
 ```
 
 ```{r}
-#| echo: false
 library(ggplot2)
-theme_set(theme_classic())
-main_data |> drop_na() |>
-  ggplot(aes(direction)) +
-  geom_bar(aes(fill = direction), width = 0.5) + 
-  labs(title="Histogram on Categorical Variable", 
-       subtitle="Manufacturer across Vehicle Classes") 
-
+library(lubridate)
+theme_set(theme_bw())
+ggplot(main_data, aes(x = time)) + 
+  geom_line(aes(y = temperature, col = "temperature")) +
+  labs(title = "Time Series of Returns Percentage", 
+       subtitle = "Drawn From Wide Data format", 
+       caption = "Source: Economics", y = "Returns %")
 ```
 
+```{r}
+library(ggplot2)
+library(quantmod)
+main_data$perc <- c(0, diff(main_data$temperature)/main_data$temperature[-length(main_data$temperature)])
+brks <- economics$date[seq(1, length(main_data$time), 1)]
+lbls <- lubridate::year(main_data$time[seq(1, length(main_data$time), 1)])
+main_data |> 
+  ggplot(aes(tie, perc)) + 
+  geom_area() + 
+  scale_x_date(breaks = brks, labels = lbls) + 
+  theme(axis.text.x = element_text(angle = 90)) + 
+  labs(title = "Area Chart", 
+       subtitle = "Perc Returns for Personal Savings", 
+       y = "% Returns for Personal savings", 
+       caption = "Source: economics")
+```
